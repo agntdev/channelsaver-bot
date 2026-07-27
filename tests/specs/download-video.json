@@ -1,0 +1,124 @@
+[
+  {
+    "name": "a member can download a replied video while preserving delivery fields",
+    "steps": [
+      {
+        "send": {
+          "update": {
+            "update_id": 1,
+            "message": {
+              "message_id": 11,
+              "date": 0,
+              "chat": { "id": 1, "type": "private", "first_name": "Test" },
+              "from": { "id": 1, "is_bot": false, "first_name": "Test" },
+              "text": "/download",
+              "entities": [{ "type": "bot_command", "offset": 0, "length": 9 }],
+              "reply_to_message": {
+                "message_id": 10,
+                "date": 0,
+                "chat": { "id": 1, "type": "private", "first_name": "Test" },
+                "from": { "id": 1, "is_bot": false, "first_name": "Test" },
+                "video": {
+                  "file_id": "video-file-id",
+                  "file_unique_id": "unique-video-id",
+                  "width": 1280,
+                  "height": 720,
+                  "duration": 42,
+                  "mime_type": "video/mp4",
+                  "file_name": "clip.mp4"
+                }
+              }
+            }
+          }
+        },
+        "expect": [
+          { "method": "sendMessage", "payload": { "text": "This video is ready. Tap Download to continue." } }
+        ]
+      },
+      {
+        "send": { "callback": "download:reply" },
+        "expect": [
+          { "method": "getChatMember" },
+          { "method": "getFile", "payload": { "file_id": "video-file-id" } },
+          {
+            "method": "sendVideo",
+            "payload": { "video": "video-file-id", "duration": 42, "width": 1280, "height": 720, "caption": "Your video is ready." }
+          },
+          { "method": "sendMessage", "payload": { "text": "Your video has been sent." } }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "video delivery keeps dimensions for a second supported format",
+    "steps": [
+      {
+        "send": {
+          "update": {
+            "update_id": 3,
+            "message": {
+              "message_id": 21,
+              "date": 0,
+              "chat": { "id": 2, "type": "private", "first_name": "Test" },
+              "from": { "id": 2, "is_bot": false, "first_name": "Test" },
+              "text": "/download",
+              "entities": [{ "type": "bot_command", "offset": 0, "length": 9 }],
+              "reply_to_message": {
+                "message_id": 20,
+                "date": 0,
+                "chat": { "id": 2, "type": "private", "first_name": "Test" },
+                "from": { "id": 2, "is_bot": false, "first_name": "Test" },
+                "video": {
+                  "file_id": "mov-file-id",
+                  "file_unique_id": "unique-mov-id",
+                  "width": 1920,
+                  "height": 1080,
+                  "duration": 9,
+                  "mime_type": "video/quicktime",
+                  "file_name": "announcement.mov"
+                }
+              }
+            }
+          }
+        },
+        "expect": [{ "method": "sendMessage", "payload": { "text": "This video is ready. Tap Download to continue." } }]
+      },
+      {
+        "send": { "callback": "download:reply", "chatId": 2, "userId": 2 },
+        "expect": [{ "method": "sendVideo", "payload": { "video": "mov-file-id", "width": 1920, "height": 1080, "duration": 9 } }]
+      }
+    ]
+  },
+  {
+    "name": "public source chats are rejected before the file is accessed",
+    "steps": [
+      {
+        "send": {
+          "update": {
+            "update_id": 4,
+            "message": {
+              "message_id": 31,
+              "date": 0,
+              "chat": { "id": -1001, "type": "supergroup", "title": "Public", "username": "public_channel" },
+              "from": { "id": 3, "is_bot": false, "first_name": "Test" },
+              "text": "/download",
+              "entities": [{ "type": "bot_command", "offset": 0, "length": 9 }],
+              "reply_to_message": {
+                "message_id": 30,
+                "date": 0,
+                "chat": { "id": -1001, "type": "supergroup", "title": "Public", "username": "public_channel" },
+                "from": { "id": 3, "is_bot": false, "first_name": "Test" },
+                "video": { "file_id": "public-file", "file_unique_id": "public-unique", "width": 1, "height": 1, "duration": 1 }
+              }
+            }
+          }
+        },
+        "expect": [{ "method": "sendMessage", "payload": { "text": "This video is ready. Tap Download to continue." } }]
+      },
+      {
+        "send": { "callback": "download:reply", "chatId": -1001, "userId": 3 },
+        "expect": [{ "method": "sendMessage", "payload": { "text": "This bot only downloads videos from private chats." } }]
+      }
+    ]
+  }
+]

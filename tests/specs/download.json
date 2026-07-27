@@ -7,7 +7,7 @@
           {
             "method": "sendMessage",
             "payload": {
-              "text": "Trigger video download when replying to a video message"
+              "text": "Reply to a video, then use /download."
             }
           }
         ],
