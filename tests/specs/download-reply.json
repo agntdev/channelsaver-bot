@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Download",
+    "steps": [
+      {
+        "expect": [
+          {
+            "method": "sendMessage",
+            "payload": {
+              "text": "Inline button shown under video messages for quick download requests"
+            }
+          }
+        ],
+        "send": {
+          "callback": "download:reply"
+        }
+      }
+    ]
+  }
+]
