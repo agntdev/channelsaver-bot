@@ -1,12 +1,36 @@
 import { Composer } from "grammy";
 import { createBot, type BotContext, type CreateBotOptions } from "./toolkit/index.js";
 import type { StorageAdapter } from "grammy";
+import { configureVideoStore } from "./video-store.js";
 
 // The per-chat session shape (ephemeral conversation state only). Extend as the
 // bot grows. Durable domain data must NOT live here — use the toolkit's
 // persistent storage (see AGENTS.md).
 export interface Session {
-  // example: step?: "awaiting_amount";
+  /** Last video offered in this chat. Conversation state only. */
+  pendingVideo?: PendingVideo;
+  /** Metadata about the last successful delivery in this chat. */
+  deliveredFile?: DeliveredFile;
+}
+
+export interface PendingVideo {
+  chatId: number;
+  messageId: number;
+  fileId: string;
+  fileName?: string;
+  mimeType?: string;
+  duration?: number;
+  width?: number;
+  height?: number;
+  supportsStreaming?: boolean;
+  isPublic?: boolean;
+}
+
+export interface DeliveredFile {
+  originalFilename?: string;
+  mimeType?: string;
+  metadataHash: string;
+  deliveryChatId: number;
 }
 
 export type Ctx = BotContext<Session>;
@@ -43,6 +67,9 @@ export interface BuildBotOptions {
  * build-time manifest because Workers has no filesystem.
  */
 export async function buildBot(token: string, opts: BuildBotOptions = {}) {
+  // Feature records use the same durable adapter as conversation sessions on
+  // Workers; Node resolves the toolkit's Redis-backed default when omitted.
+  configureVideoStore(opts.storage as StorageAdapter<Record<string, unknown>> | undefined);
   const bot = createBot<Session>(token, {
     initial: () => ({}),
     storage: opts.storage,

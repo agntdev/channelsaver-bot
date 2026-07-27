@@ -1,0 +1,30 @@
+[
+  {
+    "name": "settings are available from the main menu",
+    "steps": [
+      {
+        "send": { "callback": "settings:show" },
+        "expect": [
+          {
+            "method": "editMessageText",
+            "payload": { "text": "Download settings\n\nAdmin alerts: Not configured\nFilename format: Original name\nAudit retention: 30 days" }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "an owner can enable alerts for the active chat",
+    "steps": [
+      {
+        "send": { "callback": "settings:admin" },
+        "expect": [
+          {
+            "method": "editMessageText",
+            "payload": { "text": "Download settings\n\nAdmin alerts: This chat\nFilename format: Original name\nAudit retention: 30 days" }
+          }
+        ]
+      }
+    ]
+  }
+]

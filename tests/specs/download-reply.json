@@ -7,7 +7,7 @@
           {
             "method": "sendMessage",
             "payload": {
-              "text": "Inline button shown under video messages for quick download requests"
+              "text": "Reply to a video first, then tap Download."
             }
           }
         ],
